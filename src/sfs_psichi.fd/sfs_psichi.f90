@@ -130,7 +130,8 @@
 		! Get grid I,J dimensions and identifier for spectral truncation
   		idim=gfld%igdtmpl(8)
     		jdim=gfld%igdtmpl(9)
-		idrt=gfld%igdtnum  ! can also be gfld%griddef
+		!idrt=gfld%igdtnum  ! can also be gfld%griddef
+		idrt=gfld%griddef
 
   		! get specs for output grib2 file
     		npt = gfld%ngrdpts
@@ -199,7 +200,7 @@
 	deallocate(udata)
  	deallocate(vdata)
 
-	idrt=0    !!! check how to get this right.... !=0 yields psi=0
+	!idrt=0    !!! check how to get this right.... !=0 yields psi=0
     	if(idrt == 0)then
 	   jcap = (jdim-3)/2
 	 else
