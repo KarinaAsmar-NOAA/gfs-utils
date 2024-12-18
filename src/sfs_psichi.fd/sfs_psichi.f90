@@ -192,15 +192,25 @@
     	    enddo
    	  enddo
   	enddo
+
+	print*,'udata',udata(idim/2,jdim/2,ldim/2)
+	print*,'vdata',vdata(idim/2,jdim/2,ldim/2)
+
 	deallocate(udata)
  	deallocate(vdata)
 
+	idrt=0    !!! check how to get this right.... !=0 yields psi=0
     	if(idrt == 0)then
 	   jcap = (jdim-3)/2
 	 else
 	   jcap = jdim-1
 	 end if
 
+	print*,'ui',ui(idim/2,jdim/2,ldim/2)
+	print*,'vi',vi(idim/2,jdim/2,ldim/2)
+	print*,'jcap',jcap
+	print*,'idrt',idrt
+	print*,'dims',idim,jdim,ldim
         call sptrunv(0,jcap,idrt,idim,jdim,idrt,idim,jdim,ldim,          &
                      0,0,0,0,0,0,0,0,ui(1,1,1),vi(1,1,1),		 &
                     .false.,uo(1,1,1),vo(1,1,1),.false.,div,zo,.true.	 &
@@ -212,8 +222,8 @@
    	deallocate(vo)
     	deallocate(div)
      	deallocate(zo)
-        !print*,'psio',psio(idim/2,jdim/2,ldim/2)
-        !print*,'so',so(idim/2,jdim/2,ldim/2)
+        print*,'psio',psio(idim/2,jdim/2,ldim/2)
+        print*,'so',so(idim/2,jdim/2,ldim/2)
 
 ! Write GRIB2 file 
         allocate(cgrib2(max_bytes))
