@@ -115,7 +115,7 @@
           icount=icount+1
 
           call gb_info(cgrib,lengrib,listsec0,listsec1,  &
-          ,            numfields,numlocal,maxlocal,ierr)
+                       numfields,numlocal,maxlocal,ierr)
              if (ierr/=0) then
                  write(6,*) ' ERROR querying GRIB2 message = ',ierr
                  stop 10
@@ -279,8 +279,8 @@
 	print*,  "psio", psio(idim/2,jdim/2,ldim/2)
         
         call addfield(cgrib2,max_bytes,ipdtnum,ipdstmpl,ipdtlen,  &
-                     ,coordlist,numcoord,idrtnum,idrtmpl,	  &
-                    idrtlen,psio,npt,ibmap,bmap,ierr)
+                      coordlist,numcoord,idrtnum,idrtmpl,	  &
+                      idrtlen,psio,npt,ibmap,bmap,ierr)
 
  	print*,'add field err',ierr
 
