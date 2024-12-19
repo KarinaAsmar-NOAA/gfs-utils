@@ -171,7 +171,7 @@
       		  endif
     	        endif
     	     enddo  ! end do numfields
-        enddo
+       ! enddo
 
         call gf_free(gfld)
 
@@ -326,5 +326,6 @@
 
  	deallocate(cgrib2)
        enddo   ! end do for ldim grib2
+      enddo    ! enddo for everything???
       stop
       end
