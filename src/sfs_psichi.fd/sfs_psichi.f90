@@ -41,11 +41,11 @@
       character*200 file,psichifile
       character*10 kyr,kmth
 !
-      real, allocatable ::  udata(:,:,:), vdata(:,:,:)
+      real, allocatable ::  udata(:,:,:), vdata(:,:,:), vertlevs(:)
       real, allocatable ::  ui(:,:,:), vi(:,:,:), uo(:,:,:), vo(:,:,:)
       real, allocatable ::  div(:,:,:),  zo(:,:,:)
       real, allocatable ::  psio(:,:,:), so(:,:,:)
-      real, allocatable ::  dummy1d(:)
+      real, allocatable ::  dummy1d(:), presslevs(:)
       character(len=1),allocatable,dimension(:) :: cgrib, cgrib2
 !
       integer, parameter :: msk1=32000
@@ -94,6 +94,7 @@
 ! allocate enough to get full dimensions
        allocate(udata(3000,3000,300))  
        allocate(vdata(3000,3000,300))
+       allocate(vertlev(300))
 
 ! Unpack GRIB2 as in WAFS/sorc/wafs_blending_0p25.fd/blending.f90
        icount=0
@@ -153,6 +154,8 @@
     		if ((gfld%ipdtmpl(1)==2) .and. (gfld%ipdtmpl(10)==100)) then
 		  if (gfld%ipdtmpl(2)==2) then ! U/Wind
           	    k=k+1
+	            vertlev(k)=gfld%ipdtmpl(12)
+	     	    print*,'vertical level',vertlev(k)
 	  	    do j=1,jdim
      		      do i=1,idim
 	 		udata(i,j,k)=gfld%fld((j-1)*idim+i)
@@ -165,10 +168,10 @@
 	 		vdata(i,j,k)=gfld%fld((j-1)*idim+i)
 	  	      enddo
      		    enddo
-      		endif
-    	     endif
-    	   enddo
-         enddo
+      		  endif
+    	        endif
+    	     enddo  ! end do numfields
+        enddo
 
         call gf_free(gfld)
 
@@ -177,6 +180,11 @@
 
  ! Total isobaric levels 
        ldim=k
+       allocate(presslev(ldim)
+       do l=1,ldim
+         presslev(l)=vertlevs(l)
+	 print*,'final press mb',l,presslev(l)
+       enddo
 
        allocate (ui(idim,jdim,ldim))
        allocate (vi(idim,jdim,ldim))
@@ -267,7 +275,7 @@
 			   ! ==>ifield4(9):forecast time in units defined by ifield4(8) 
 	ipdstmpl(10) = 100 ! ==> type of first fixed surface (see Code Table 4.5)
     	ipdstmpl(11) = 0   ! ==> scale factor of first fixed surface
-!==> ipdstmpl(12)	   ! ==> scaled value of first fixed surface
+	ipdstmpl(12) = 	   ! ==> scaled value of first fixed surface
  	ipdstmpl(13) = 255 ! ==> type of second fixed surface(See Code Table 4.5)
 	ipdstmpl(14) = 0   ! ==> scale factor of second fixed surface
 	ipdstmpl(15) = 0   ! == > scaled value of second fixed surface
