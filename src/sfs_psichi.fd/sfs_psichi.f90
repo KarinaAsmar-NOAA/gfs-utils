@@ -150,6 +150,11 @@
     		jdim=gfld%igdtmpl(9)
 		!idrt=gfld%igdtnum  ! can also be gfld%griddef
 		idrt=gfld%griddef
+	        !listsec1(6) ! year
+          	!jids(7)=listsec1(7) ! mon
+          	!jids(8)=listsec1(8) ! day
+          	!jids(9)=listsec1(9) ! hr
+	   	print *,' SECTION 1: ',(j,listsec1(j),j=1,13)
    	      endif
               k=k+1
 	      vertlevs(k)=gfld%ipdtmpl(12)
@@ -252,8 +257,12 @@
         listsec0_out(2)=2 ! GRIB Edition Number (currently 2)
     	listsec1_out(1)=7 ! Id of orginating centre (Common Code Table C-1)  !!! CHECK**********
     	listsec1_out(2)=4 !"EMC"! Id of orginating sub-centre (local table)/Table C of ON388 CHECK *************
-    	listsec1_out(4)=1    ! per Brent! GRIB Local Tables Version Number (Code Table 1.1)  **********
-    	listsec1_out(5)=1    ! Significance of Reference Time (Code Table 1.2)  *********************
+    	listsec1_out(4)=1 ! per Brent! GRIB Local Tables Version Number (Code Table 1.1)  **********
+    	listsec1_out(5)=1 ! Significance of Reference Time (Code Table 1.2)  *********************
+!        listsec1_out(6)=0 ! year
+!        listsec1_out(7)=0 ! mon
+!        listsec1_out(8)=0 ! day
+!        listsec1_out(9)=0 ! hr
     	listsec1_out(10) = 0 ! Reference Time - Minute
     	listsec1_out(11) = 0 ! Reference Time - Second
     	listsec1_out(12) = 0 ! Production status of data (Code Table 1.3)
