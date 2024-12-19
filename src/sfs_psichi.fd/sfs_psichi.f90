@@ -65,181 +65,170 @@
 
       logical*1,allocatable :: bmap(:)
 
-       call getenv("PGBOUT",grbwnd)
-       write(*,*) "grbwnd= ",grbwnd
+      call getenv("PGBOUT",grbwnd)
+      write(*,*) "grbwnd= ",grbwnd
 !
-       call getenv("PGIOUT",indwnd)
-       write(*,*) "indwnd= ",indwnd
+      call getenv("PGIOUT",indwnd)
+      write(*,*) "indwnd= ",indwnd
 !
-       call getenv("psichifile",psichifile)
-       write(*,*) "psichifile= ",psichifile
+      call getenv("psichifile",psichifile)
+      write(*,*) "psichifile= ",psichifile
 
-       call baopenr(11,grbwnd,ierr)
-         if(ierr.ne.0) then
-         print *,'error opening file ',grbwnd
-         call abort
-       endif
-       call baopenr(12,indwnd,ierr)
-         if(ierr.ne.0) then
+      call baopenr(11,grbwnd,ierr)
+        if(ierr.ne.0) then
+          print *,'error opening file ',grbwnd
+          call abort
+        endif
+      call baopenr(12,indwnd,ierr)
+        if(ierr.ne.0) then
          print *,'error opening file ',indwnd
          call abort
-       endif
+        endif
 !
-       call baopenwt(51,psichifile,ierr)
-         if(ierr.ne.0) then
+      call baopenwt(51,psichifile,ierr)
+        if(ierr.ne.0) then
          print *,'error opening file ',psichifile
          call abort
-       endif
+        endif
 
 ! allocate enough to get full dimensions
-       allocate(udata(3000,3000,300))  
-       allocate(vdata(3000,3000,300))
-       allocate(vertlevs(300))
+      allocate(udata(3000,3000,300))  
+      allocate(vdata(3000,3000,300))
+      allocate(vertlevs(300))
 
 ! Unpack GRIB2 as in WAFS/sorc/wafs_blending_0p25.fd/blending.f90
-       icount=0  ! count of each grib2 message
-       iseek=0
-       k=0
-       do
-          call skgb(11,iseek,msk1,lskip,lgrib)
+      icount=0  ! count of each grib2 message
+      iseek=0
+      k=0
+      do
+        call skgb(11,iseek,msk1,lskip,lgrib)
           if (lgrib==0) exit    ! end loop at EOF or problem
           if (lgrib>currlen) then
              if (allocated(cgrib)) deallocate(cgrib)
              allocate(cgrib(lgrib),stat=ierr)
              currlen=lgrib
            endif
-          call baread(11,lskip,lgrib,lengrib,cgrib)
-             if (lgrib/=lengrib) then
-             print *,' degrib2: IO Error.'
-             call errexit(9)
+        call baread(11,lskip,lgrib,lengrib,cgrib)
+          if (lgrib/=lengrib) then
+            print *,' degrib2: IO Error.'
+            call errexit(9)
           endif
-          iseek=lskip+lgrib
-          icount=icount+1
+        iseek=lskip+lgrib
+        icount=icount+1
 
-          call gb_info(cgrib,lengrib,listsec0,listsec1,  &
+        call gb_info(cgrib,lengrib,listsec0,listsec1,  &
                        numfields,numlocal,maxlocal,ierr)
-             if (ierr/=0) then
-                 write(6,*) ' ERROR querying GRIB2 message = ',ierr
-                 stop 10
-             endif
-             do n=1,numfields
-             call gf_getfld(cgrib,lengrib,n,.true.,.true.,gfld,ierr)
-                if (ierr/=0) then
-                write(6,*) ' ERROR extracting field = ',ierr
-                cycle
-                endif
-		
-		! Get grid I,J dimensions and identifier for spectral truncation
+        if (ierr/=0) then
+          write(6,*) ' ERROR querying GRIB2 message = ',ierr
+          stop 10
+        endif
+        do n=1,numfields
+        call gf_getfld(cgrib,lengrib,n,.true.,.true.,gfld,ierr)
+          if (ierr/=0) then
+            write(6,*) ' ERROR extracting field = ',ierr
+            cycle
+          endif
+
+ 	  ! CATEGORY NO.: gfld%ipdtmpl(1) =2 METEO./MOMENTUM
+   	  ! PARAMETER NO.: gfld%ipdtmpl(2) =2 UGRD =3 VGRD
+     	  ! LEVEL ID: gfld%ipdtmpl(10) = 100 ISOBARIC SURFACE
+       	  ! LEVEL VALUE: gfld%ipdtmpl(12) = MB
+
+    	  if ((gfld%ipdtmpl(1)==2) .and. (gfld%ipdtmpl(10)==100)) then
+	    if (gfld%ipdtmpl(2)==2) then ! U/Wind
+    	      if (k==0) then   ! get specs for output grib2 file, only once
+        	npt = gfld%ngrdpts
+    		max_bytes = npt*4
+		igdtlen = gfld%igdtlen
+      		igdstmpl = gfld%igdtmpl
+		ipdtnum = gfld%ipdtnum
+  		ipdtlen	= gfld%ipdtlen
+    		idrtnum = gfld%idrtnum
+      		idrtlen = gfld%idrtlen
+		idrtmpl = gfld%idrtmpl
   		idim=gfld%igdtmpl(8)
     		jdim=gfld%igdtmpl(9)
 		!idrt=gfld%igdtnum  ! can also be gfld%griddef
 		idrt=gfld%griddef
+   	      endif
+              k=k+1
+	      vertlevs(k)=gfld%ipdtmpl(12)
+	      print*,'vertical level',vertlevs(k)
+	      do j=1,jdim
+     	      do i=1,idim
+	 	udata(i,j,k)=gfld%fld((j-1)*idim+i)
+	      enddo
+     	      enddo
+	   endif
+     	   if (gfld%ipdtmpl(2)==3) then ! V/Wind
+	     do j=1,jdim
+     	     do i=1,idim
+	 	vdata(i,j,k)=gfld%fld((j-1)*idim+i)
+	     enddo
+     	     enddo
+      	   endif
+    	  endif  ! end u/v winds block
+    	enddo  ! end do numfields
+      enddo  ! end of grib file unpacking
 
-  		! get specs for output grib2 file
-!    		npt = gfld%ngrdpts
-!    		max_bytes = npt*4
-!		igdtlen = gfld%igdtlen
-!      		igdstmpl = gfld%igdtmpl
-!		ipdtnum = gfld%ipdtnum
-!  		ipdtlen	= gfld%ipdtlen
-!    		idrtnum = gfld%idrtnum
-!      		idrtlen = gfld%idrtlen
-!		idrtmpl = gfld%idrtmpl
-
- 		! CATEGORY NO.: gfld%ipdtmpl(1) =2 METEO./MOMENTUM
-   		! PARAMETER NO.: gfld%ipdtmpl(2) =2 UGRD =3 VGRD
-     		! LEVEL ID: gfld%ipdtmpl(10) = 100 ISOBARIC SURFACE
-       		! LEVEL VALUE: gfld%ipdtmpl(12) = MB
-
-    		if ((gfld%ipdtmpl(1)==2) .and. (gfld%ipdtmpl(10)==100)) then
-		  if (gfld%ipdtmpl(2)==2) then ! U/Wind
-        		npt = gfld%ngrdpts
-    			max_bytes = npt*4
-			igdtlen = gfld%igdtlen
-      			igdstmpl = gfld%igdtmpl
-			ipdtnum = gfld%ipdtnum
-  			ipdtlen	= gfld%ipdtlen
-    			idrtnum = gfld%idrtnum
-      			idrtlen = gfld%idrtlen
-			idrtmpl = gfld%idrtmpl
-          	    k=k+1
-	            vertlevs(k)=gfld%ipdtmpl(12)
-	     	    print*,'vertical level',vertlevs(k)
-	  	    do j=1,jdim
-     		      do i=1,idim
-	 		udata(i,j,k)=gfld%fld((j-1)*idim+i)
-	  	      enddo
-     		    enddo
-	 	  endif
-     		  if (gfld%ipdtmpl(2)==3) then ! V/Wind
-	  	    do j=1,jdim
-     		      do i=1,idim
-	 		vdata(i,j,k)=gfld%fld((j-1)*idim+i)
-	  	      enddo
-     		    enddo
-      		  endif
-    	        endif
-    	     enddo  ! end do numfields
-       enddo
-
-        call gf_free(gfld)
+      call gf_free(gfld)
 
  ! Allocate arrays, compute spectral max. wave for truncation
  ! and perform spectral truncation of winds
 
  ! Total isobaric levels 
-       ldim=k
-       allocate(presslevs(ldim))
-       do l=1,ldim
-         presslevs(l)=vertlevs(l)
-	 print*,'final press mb',l,presslevs(l)
-       enddo
+      ldim=k
+      allocate(presslevs(ldim))
+      do l=1,ldim
+        presslevs(l)=vertlevs(l)
+	print*,'final press mb',l,presslevs(l)
+      enddo
 
-       allocate (ui(idim,jdim,ldim))
-       allocate (vi(idim,jdim,ldim))
-       allocate (uo(idim,jdim,ldim))
-       allocate (vo(idim,jdim,ldim))
-       allocate (div(idim,jdim,ldim))
-       allocate (zo(idim,jdim,ldim))
-       allocate (psio(idim,jdim,ldim))
-       allocate (so(idim,jdim,ldim))
- 	do l=1,ldim
-  	  do j=1,jdim
-   	    do i=1,idim
-    	      ui(i,j,l)=udata(i,j,l)
-              vi(i,j,l)=vdata(i,j,l)
-    	    enddo
-   	  enddo
-  	enddo
+      allocate (ui(idim,jdim,ldim))
+      allocate (vi(idim,jdim,ldim))
+      allocate (uo(idim,jdim,ldim))
+      allocate (vo(idim,jdim,ldim))
+      allocate (div(idim,jdim,ldim))
+      allocate (zo(idim,jdim,ldim))
+      allocate (psio(idim,jdim,ldim))
+      allocate (so(idim,jdim,ldim))
+      do l=1,ldim
+      do j=1,jdim
+      do i=1,idim
+    	ui(i,j,l)=udata(i,j,l)
+        vi(i,j,l)=vdata(i,j,l)
+      enddo
+      enddo
+      enddo
 
 	print*,'udata',udata(idim/2,jdim/2,ldim/2)
 	print*,'vdata',vdata(idim/2,jdim/2,ldim/2)
 
-	deallocate(udata)
- 	deallocate(vdata)
+      deallocate(udata)
+      deallocate(vdata)
 
-	!idrt=0    !!! check how to get this right.... !=0 yields psi=0
-    	if(idrt == 0)then
-	   jcap = (jdim-3)/2
-	 else
-	   jcap = jdim-1
-	 end if
+      !idrt=0    !!! check how to get this right.... !=0 yields psi=0
+      if(idrt == 0)then
+	jcap = (jdim-3)/2
+      else
+	jcap = jdim-1
+      end if
 
 	print*,'ui',ui(idim/2,jdim/2,ldim/2)
 	print*,'vi',vi(idim/2,jdim/2,ldim/2)
 	print*,'jcap',jcap
 	print*,'idrt',idrt
-        call sptrunv(0,jcap,idrt,idim,jdim,idrt,idim,jdim,ldim,          &
-                     0,0,0,0,0,0,0,0,ui(1,1,1),vi(1,1,1),		 &
+       call sptrunv(0,jcap,idrt,idim,jdim,idrt,idim,jdim,ldim,           &
+                    0,0,0,0,0,0,0,0,ui(1,1,1),vi(1,1,1),		 &
                     .false.,uo(1,1,1),vo(1,1,1),.false.,div,zo,.true.	 &
                     ,psio(1,1,1),so(1,1,1))
 
-	deallocate(ui)
- 	deallocate(vi)
-  	deallocate(uo)
-   	deallocate(vo)
-    	deallocate(div)
-     	deallocate(zo)
+      deallocate(ui)
+      deallocate(vi)
+      deallocate(uo)
+      deallocate(vo)
+      deallocate(div)
+      deallocate(zo)
         do l=1,ldim
 	  print*,'psio',l,psio(idim/2,jdim/2,l)
    	  print*,'so',l,so(idim/2,jdim/2,l)
@@ -248,6 +237,7 @@
 ! Write GRIB2 file for each mb level
       allocate(ipdstmpl((ipdtlen)))
       allocate(bmap(npt))
+      
       do l=1,ldim
         lev=presslevs(l)
         allocate(cgrib2(max_bytes))
@@ -316,7 +306,7 @@
      	  enddo
 	enddo
 
-      	print*,'dummy1d',shape(dummy1d)
+      	print*,'dummy1d',sum(dummy1d)/size(dummy1d)
        	print*,'dimensions',idim,jdim,ldim
 	print*,'grid points',idim*jdim,npt
         
@@ -332,7 +322,8 @@
 
 	deallocate(dummy1d)
  	deallocate(cgrib2)
-       enddo   ! end do for ldim grib2
-!      enddo    ! enddo for everything???
-      stop
-      end
+      enddo   ! end do for ldim grib2
+
+      STOP
+
+      END
