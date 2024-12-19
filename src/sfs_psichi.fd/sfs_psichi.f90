@@ -297,6 +297,7 @@
           do j=1,jdim
 	    do i=1,idim
      	      dummy1d(ijl)=psio(i,j,l)
+	      ijl=ijl+1
      	    enddo
 	  enddo
      	enddo
