@@ -180,7 +180,7 @@
 
  ! Total isobaric levels 
        ldim=k
-       allocate(presslev(ldim)
+       allocate(presslev(ldim))
        do l=1,ldim
          presslev(l)=vertlevs(l)
 	 print*,'final press mb',l,presslev(l)
@@ -275,7 +275,7 @@
 			   ! ==>ifield4(9):forecast time in units defined by ifield4(8) 
 	ipdstmpl(10) = 100 ! ==> type of first fixed surface (see Code Table 4.5)
     	ipdstmpl(11) = 0   ! ==> scale factor of first fixed surface
-	ipdstmpl(12) = 	   ! ==> scaled value of first fixed surface
+!!!! *******ipdstmpl(12) = 	   ! ==> scaled value of first fixed surface
  	ipdstmpl(13) = 255 ! ==> type of second fixed surface(See Code Table 4.5)
 	ipdstmpl(14) = 0   ! ==> scale factor of second fixed surface
 	ipdstmpl(15) = 0   ! == > scaled value of second fixed surface
