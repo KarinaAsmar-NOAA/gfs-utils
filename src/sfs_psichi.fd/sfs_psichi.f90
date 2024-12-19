@@ -171,9 +171,9 @@
       		  endif
     	        endif
     	     enddo  ! end do numfields
-       enddo
+!       enddo
 
-        call gf_free(gfld)
+ !       call gf_free(gfld)
 
  ! Allocate arrays, compute spectral max. wave for truncation
  ! and perform spectral truncation of winds
@@ -327,6 +327,6 @@
 
  	deallocate(cgrib2)
        enddo   ! end do for ldim grib2
-!      enddo    ! enddo for everything???
+      enddo    ! enddo for everything???
       stop
       end
