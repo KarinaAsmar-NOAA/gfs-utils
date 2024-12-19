@@ -45,12 +45,13 @@
       real, allocatable ::  ui(:,:,:), vi(:,:,:), uo(:,:,:), vo(:,:,:)
       real, allocatable ::  div(:,:,:),  zo(:,:,:)
       real, allocatable ::  psio(:,:,:), so(:,:,:)
+      real, allocatable ::  dummy1d(:)
       character(len=1),allocatable,dimension(:) :: cgrib, cgrib2
 !
       integer, parameter :: msk1=32000
 !
       integer :: idim, jdim, kdim, ldim, jcap, idrt,  &
-                 ierr, i, j, l, k, n
+                 ierr, i, j, l, k, n, ijl
       integer :: numfields,numlocal,maxlocal
       integer :: currlen=0,icount,itot,iseek
       integer :: lskip,lgrib,igdtlen,ipdtnum,ipdtlen
@@ -288,10 +289,25 @@
     	print *, "idrtnum=",idrtnum,idrtlen,idrtmpl
 	print*,  "ipdstmpl",ipdstmpl
 	print*,  "psio", psio(idim/2,jdim/2,ldim/2)
+
+ 	! build the array field for grib2
+  	allocate(dummy1d(idim*jdim*ldim))
+   	ijl=1
+    	do l=1,ldim
+          do j=1,jdim
+	    do i=1,idim
+     	      dummy1d(ijl)=psio(i,j,l)
+     	    enddo
+	  enddo
+     	enddo
+
+      	print*,'dummy1d',shape(dummy1d)
+       	print*,'dimensions',idim,jdim,ldim
+	print*,'grid points',idim*jdim*ldim,npt
         
         call addfield(cgrib2,max_bytes,ipdtnum,ipdstmpl,ipdtlen,  &
                       coordlist,numcoord,idrtnum,idrtmpl,	  &
-                      idrtlen,psio,npt,ibmap,bmap,ierr)
+                      idrtlen,dummy1d,npt,ibmap,bmap,ierr)
 
  	print*,'add field err',ierr
 
