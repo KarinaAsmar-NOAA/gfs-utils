@@ -97,7 +97,7 @@
        allocate(vertlevs(300))
 
 ! Unpack GRIB2 as in WAFS/sorc/wafs_blending_0p25.fd/blending.f90
-       icount=0
+       icount=0  ! count of each grib2 message
        iseek=0
        k=0
        do
@@ -136,15 +136,15 @@
 		idrt=gfld%griddef
 
   		! get specs for output grib2 file
-    		npt = gfld%ngrdpts
-    		max_bytes = npt*4
-		igdtlen = gfld%igdtlen
-      		igdstmpl = gfld%igdtmpl
-		ipdtnum = gfld%ipdtnum
-  		ipdtlen	= gfld%ipdtlen
-    		idrtnum = gfld%idrtnum
-      		idrtlen = gfld%idrtlen
-		idrtmpl = gfld%idrtmpl
+!    		npt = gfld%ngrdpts
+!    		max_bytes = npt*4
+!		igdtlen = gfld%igdtlen
+!      		igdstmpl = gfld%igdtmpl
+!		ipdtnum = gfld%ipdtnum
+!  		ipdtlen	= gfld%ipdtlen
+!    		idrtnum = gfld%idrtnum
+!      		idrtlen = gfld%idrtlen
+!		idrtmpl = gfld%idrtmpl
 
  		! CATEGORY NO.: gfld%ipdtmpl(1) =2 METEO./MOMENTUM
    		! PARAMETER NO.: gfld%ipdtmpl(2) =2 UGRD =3 VGRD
@@ -153,6 +153,15 @@
 
     		if ((gfld%ipdtmpl(1)==2) .and. (gfld%ipdtmpl(10)==100)) then
 		  if (gfld%ipdtmpl(2)==2) then ! U/Wind
+        		npt = gfld%ngrdpts
+    			max_bytes = npt*4
+			igdtlen = gfld%igdtlen
+      			igdstmpl = gfld%igdtmpl
+			ipdtnum = gfld%ipdtnum
+  			ipdtlen	= gfld%ipdtlen
+    			idrtnum = gfld%idrtnum
+      			idrtlen = gfld%idrtlen
+			idrtmpl = gfld%idrtmpl
           	    k=k+1
 	            vertlevs(k)=gfld%ipdtmpl(12)
 	     	    print*,'vertical level',vertlevs(k)
