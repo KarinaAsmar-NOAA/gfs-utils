@@ -171,9 +171,9 @@
       		  endif
     	        endif
     	     enddo  ! end do numfields
-!       enddo
+       enddo
 
- !       call gf_free(gfld)
+        call gf_free(gfld)
 
  ! Allocate arrays, compute spectral max. wave for truncation
  ! and perform spectral truncation of winds
@@ -241,6 +241,10 @@
         lev=presslevs(l)
         allocate(cgrib2(max_bytes))
 
+ 	print*,'grib loop',l,ipdtlen
+    	print *, "ipdtnum=",ipdtnum,ipdtlen,ipdstmpl
+    	print *, "idrtnum=",idrtnum,idrtlen,idrtmpl
+	print*,  "ipdstmpl",ipdstmpl
 !==>initialize new GRIB2 message and pack
 ! GRIB2 sections 0 (Indicator Section) and 1 (Identification Section)
         listsec0_out(1)=0 ! Discipline-GRIB Master Table Number (see Code Table 0.0)
@@ -294,13 +298,6 @@
 	
 	allocate(bmap(npt))
 
-    	print *, "npt=",npt
-    	print *, "ipdtnum=",ipdtnum,ipdtlen,ipdstmpl
-    	print *, "coordlist=",coordlist,numcoord
-    	print *, "idrtnum=",idrtnum,idrtlen,idrtmpl
-	print*,  "ipdstmpl",ipdstmpl
-	print*,  "psio", psio(idim/2,jdim/2,ldim/2)
-
  	! build the array field for grib2
   	allocate(dummy1d(idim*jdim))
    	ij=1
@@ -327,6 +324,6 @@
 
  	deallocate(cgrib2)
        enddo   ! end do for ldim grib2
-      enddo    ! enddo for everything???
+!      enddo    ! enddo for everything???
       stop
       end
