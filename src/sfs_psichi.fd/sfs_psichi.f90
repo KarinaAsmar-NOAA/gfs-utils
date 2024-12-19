@@ -50,7 +50,7 @@
 !
       integer, parameter :: msk1=32000
 !
-      integer :: idim, jdim, kdim, ldim, jcap, idrt, lev &
+      integer :: idim, jdim, kdim, ldim, jcap, idrt, lev, &
                  ierr, i, j, l, k, n, ij
       integer :: numfields,numlocal,maxlocal
       integer :: currlen=0,icount,itot,iseek
@@ -305,7 +305,7 @@
    	ij=1
         do j=1,jdim
 	  do i=1,idim
-     	    dummy1d(ij)=psio(i,j,1)
+     	    dummy1d(ij)=psio(i,j,l)
 	    ij=ij+1
      	  enddo
 	enddo
