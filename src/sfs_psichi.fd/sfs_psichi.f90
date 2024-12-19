@@ -246,6 +246,7 @@
 	enddo
 
 ! Write GRIB2 file for each mb level
+      allocate(ipdstmpl((ipdtlen)))
       do l=1,ldim
         lev=presslevs(l)
         allocate(cgrib2(max_bytes))
@@ -279,7 +280,6 @@
 	call addgrid(cgrib2,max_bytes,igds,igdstmpl,igdtlen,0,1,ierr)
 
 ! ADD STREAMFUNCTION
-     	allocate(ipdstmpl((ipdtlen)))
         ipdstmpl(1) = 2    ! ==> parameter category (see Code Table 4.1)
 	ipdstmpl(2) = 4    ! ==> parameter number (see Code Tavle 4.2)
 	ipdstmpl(3) = 2    ! ==> type of generating process (see Code Table 4.3)
