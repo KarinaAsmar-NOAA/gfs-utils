@@ -312,7 +312,7 @@
    	call gribend(cgrib2,max_bytes,lengrib,ierr)
 	print*,'gribend err',ierr
     
-        call wryte(lunout, lengrib, cgrib)
+        call wryte(51, lengrib, cgrib2)
 
  	deallocate(cgrib2)
   
