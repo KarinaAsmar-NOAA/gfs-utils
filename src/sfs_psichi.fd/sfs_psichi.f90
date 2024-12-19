@@ -300,13 +300,13 @@
   	allocate(dummy1d(idim*jdim))
    	ij=1
         do j=1,jdim
-	  do i=1,idim
-     	    dummy1d(ij)=psio(i,j,l)
-	    ij=ij+1
-     	  enddo
+	do i=1,idim
+     	  dummy1d(ij)=psio(i,j,l)
+	  ij=ij+1
+     	enddo
 	enddo
 
-      	print*,'dummy1d',sum(dummy1d)/size(dummy1d)
+      	print*,'dummy1d',maxval(dummy1d),minval(dummy1d)
        	print*,'dimensions',idim,jdim,ldim
 	print*,'grid points',idim*jdim,npt
         
