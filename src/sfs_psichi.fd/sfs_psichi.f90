@@ -94,7 +94,7 @@
 ! allocate enough to get full dimensions
        allocate(udata(3000,3000,300))  
        allocate(vdata(3000,3000,300))
-       allocate(vertlev(300))
+       allocate(vertlevs(300))
 
 ! Unpack GRIB2 as in WAFS/sorc/wafs_blending_0p25.fd/blending.f90
        icount=0
@@ -154,8 +154,8 @@
     		if ((gfld%ipdtmpl(1)==2) .and. (gfld%ipdtmpl(10)==100)) then
 		  if (gfld%ipdtmpl(2)==2) then ! U/Wind
           	    k=k+1
-	            vertlev(k)=gfld%ipdtmpl(12)
-	     	    print*,'vertical level',vertlev(k)
+	            vertlevs(k)=gfld%ipdtmpl(12)
+	     	    print*,'vertical level',vertlevs(k)
 	  	    do j=1,jdim
      		      do i=1,idim
 	 		udata(i,j,k)=gfld%fld((j-1)*idim+i)
@@ -180,10 +180,10 @@
 
  ! Total isobaric levels 
        ldim=k
-       allocate(presslev(ldim))
+       allocate(presslevs(ldim))
        do l=1,ldim
-         presslev(l)=vertlevs(l)
-	 print*,'final press mb',l,presslev(l)
+         presslevs(l)=vertlevs(l)
+	 print*,'final press mb',l,presslevs(l)
        enddo
 
        allocate (ui(idim,jdim,ldim))
