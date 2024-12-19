@@ -50,7 +50,7 @@
 !
       integer, parameter :: msk1=32000
 !
-      integer :: idim, jdim, kdim, ldim, jcap, idrt,  &
+      integer :: idim, jdim, kdim, ldim, jcap, idrt, lev &
                  ierr, i, j, l, k, n, ij
       integer :: numfields,numlocal,maxlocal
       integer :: currlen=0,icount,itot,iseek
@@ -220,7 +220,7 @@
 	print*,'vi',vi(idim/2,jdim/2,ldim/2)
 	print*,'jcap',jcap
 	print*,'idrt',idrt
-	print*,'dims',idim,jdim,ldim
+	!print*,'dims',idim,jdim,ldim
         call sptrunv(0,jcap,idrt,idim,jdim,idrt,idim,jdim,ldim,          &
                      0,0,0,0,0,0,0,0,ui(1,1,1),vi(1,1,1),		 &
                     .false.,uo(1,1,1),vo(1,1,1),.false.,div,zo,.true.	 &
@@ -235,7 +235,9 @@
         print*,'psio',psio(idim/2,jdim/2,ldim/2)
         print*,'so',so(idim/2,jdim/2,ldim/2)
 
-! Write GRIB2 file 
+! Write GRIB2 file for each mb level
+      do l=1,ldim
+        lev=presslevs(l)
         allocate(cgrib2(max_bytes))
 
 !==>initialize new GRIB2 message and pack
@@ -275,7 +277,7 @@
 			   ! ==>ifield4(9):forecast time in units defined by ifield4(8) 
 	ipdstmpl(10) = 100 ! ==> type of first fixed surface (see Code Table 4.5)
     	ipdstmpl(11) = 0   ! ==> scale factor of first fixed surface
-!!!! *******ipdstmpl(12) = 	   ! ==> scaled value of first fixed surface
+	ipdstmpl(12) = lev ! ==> scaled value of first fixed surface
  	ipdstmpl(13) = 255 ! ==> type of second fixed surface(See Code Table 4.5)
 	ipdstmpl(14) = 0   ! ==> scale factor of second fixed surface
 	ipdstmpl(15) = 0   ! == > scaled value of second fixed surface
@@ -323,6 +325,6 @@
         call wryte(51, lengrib, cgrib2)
 
  	deallocate(cgrib2)
-  
+       enddo   ! end do for ldim grib2
       stop
       end
