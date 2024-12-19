@@ -171,7 +171,7 @@
       		  endif
     	        endif
     	     enddo  ! end do numfields
-       ! enddo
+       enddo
 
         call gf_free(gfld)
 
@@ -220,7 +220,6 @@
 	print*,'vi',vi(idim/2,jdim/2,ldim/2)
 	print*,'jcap',jcap
 	print*,'idrt',idrt
-	!print*,'dims',idim,jdim,ldim
         call sptrunv(0,jcap,idrt,idim,jdim,idrt,idim,jdim,ldim,          &
                      0,0,0,0,0,0,0,0,ui(1,1,1),vi(1,1,1),		 &
                     .false.,uo(1,1,1),vo(1,1,1),.false.,div,zo,.true.	 &
@@ -232,8 +231,10 @@
    	deallocate(vo)
     	deallocate(div)
      	deallocate(zo)
-        print*,'psio',psio(idim/2,jdim/2,ldim/2)
-        print*,'so',so(idim/2,jdim/2,ldim/2)
+        do l=1,ldim
+	  print*,'psio',l,psio(idim/2,jdim/2,l)
+   	  print*,'so',l,so(idim/2,jdim/2,l)
+	enddo
 
 ! Write GRIB2 file for each mb level
       do l=1,ldim
@@ -326,6 +327,6 @@
 
  	deallocate(cgrib2)
        enddo   ! end do for ldim grib2
-      enddo    ! enddo for everything???
+!      enddo    ! enddo for everything???
       stop
       end
