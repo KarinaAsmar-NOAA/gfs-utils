@@ -51,7 +51,7 @@
       integer, parameter :: msk1=32000
 !
       integer :: idim, jdim, kdim, ldim, jcap, idrt,  &
-                 ierr, i, j, l, k, n, ijl
+                 ierr, i, j, l, k, n, ij
       integer :: numfields,numlocal,maxlocal
       integer :: currlen=0,icount,itot,iseek
       integer :: lskip,lgrib,igdtlen,ipdtnum,ipdtlen
@@ -291,30 +291,30 @@
 	print*,  "psio", psio(idim/2,jdim/2,ldim/2)
 
  	! build the array field for grib2
-  	allocate(dummy1d(idim*jdim*ldim))
-   	ijl=1
-    	do l=1,ldim
-          do j=1,jdim
-	    do i=1,idim
-     	      dummy1d(ijl)=psio(i,j,l)
-	      ijl=ijl+1
-     	    enddo
-	  enddo
-     	enddo
+  	allocate(dummy1d(idim*jdim))
+   	ij=1
+        do j=1,jdim
+	  do i=1,idim
+     	    dummy1d(ij)=psio(i,j,1)
+	    ij=ij+1
+     	  enddo
+	enddo
 
       	print*,'dummy1d',shape(dummy1d)
        	print*,'dimensions',idim,jdim,ldim
-	print*,'grid points',idim*jdim*ldim,npt
+	print*,'grid points',idim*jdim,npt
         
         call addfield(cgrib2,max_bytes,ipdtnum,ipdstmpl,ipdtlen,  &
                       coordlist,numcoord,idrtnum,idrtmpl,	  &
                       idrtlen,dummy1d,npt,ibmap,bmap,ierr)
-
  	print*,'add field err',ierr
+  	
+   	call gribend(cgrib2,max_bytes,lengrib,ierr)
+	print*,'gribend err',ierr
+    
+        call wryte(lunout, lengrib, cgrib)
 
-!  	call gribend(cgrib,max_bytes,lengrib,ierr)
-!       call wryte(lunout, lengrib, cgrib)
-
-!	deallocate(cgrib)
+ 	deallocate(cgrib2)
+  
       stop
       end
