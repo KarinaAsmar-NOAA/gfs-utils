@@ -247,6 +247,7 @@
 
 ! Write GRIB2 file for each mb level
       allocate(ipdstmpl((ipdtlen)))
+      allocate(bmap(npt))
       do l=1,ldim
         lev=presslevs(l)
         allocate(cgrib2(max_bytes))
@@ -305,8 +306,6 @@
         coordlist = 0.
 	ibmap = 255
 	
-	allocate(bmap(npt))
-
  	! build the array field for grib2
   	allocate(dummy1d(idim*jdim))
    	ij=1
@@ -331,6 +330,7 @@
     
         call wryte(51, lengrib, cgrib2)
 
+	deallocate(dummy1d)
  	deallocate(cgrib2)
        enddo   ! end do for ldim grib2
 !      enddo    ! enddo for everything???
