@@ -50,8 +50,8 @@
 !
       integer, parameter :: msk1=32000
 !
-      integer :: idim,jdim,kdim,ldim,jcap,idrt,lev, &
-      		 yy,mm,dd,fhr,ierr,i,j,l,k,n,ij
+      integer :: idim, jdim, kdim, ldim, jcap, idrt, lev, &
+                 ierr, i, j, l, k, n, ij
       integer :: numfields,numlocal,maxlocal
       integer :: currlen=0,icount,itot,iseek
       integer :: lskip,lgrib,igdtlen,ipdtnum,ipdtlen
@@ -150,11 +150,11 @@
     		jdim=gfld%igdtmpl(9)
 		!idrt=gfld%igdtnum  ! can also be gfld%griddef
 		idrt=gfld%griddef
-	        yy=listsec1(6) ! year
-          	mm=listsec1(7) ! mon
-          	dd=listsec1(8) ! day
-          	fhr=listsec1(9) ! hr
-	   	print *,' VALID DATE ',yy,mm,dd,fhr
+	        !listsec1(6) ! year
+          	!jids(7)=listsec1(7) ! mon
+          	!jids(8)=listsec1(8) ! day
+          	!jids(9)=listsec1(9) ! hr
+	   	print *,' SECTION 1: ',(j,listsec1(j),j=1,13)
    	      endif
               k=k+1
 	      vertlevs(k)=gfld%ipdtmpl(12)
@@ -296,6 +296,31 @@
         lev=presslevs(l)
         allocate(cgrib2(max_bytes))
 
+<<<<<<< HEAD
+=======
+ 	print*,'grib loop',l,ipdtlen
+    	print *, "ipdtnum=",ipdtnum,ipdtlen,ipdstmpl
+    	print *, "idrtnum=",idrtnum,idrtlen,idrtmpl
+	print*,  "ipdstmpl",ipdstmpl
+!==>initialize new GRIB2 message and pack
+! GRIB2 sections 0 (Indicator Section) and 1 (Identification Section)
+        listsec0_out(1)=0 ! Discipline-GRIB Master Table Number (see Code Table 0.0)
+        listsec0_out(2)=2 ! GRIB Edition Number (currently 2)
+    	listsec1_out(1)=7 ! Id of orginating centre (Common Code Table C-1)  !!! CHECK**********
+    	listsec1_out(2)=4 !"EMC"! Id of orginating sub-centre (local table)/Table C of ON388 CHECK *************
+    	listsec1_out(4)=1 ! per Brent! GRIB Local Tables Version Number (Code Table 1.1)  **********
+    	listsec1_out(5)=1 ! Significance of Reference Time (Code Table 1.2)  *********************
+!        listsec1_out(6)=0 ! year
+!        listsec1_out(7)=0 ! mon
+!        listsec1_out(8)=0 ! day
+!        listsec1_out(9)=0 ! hr
+    	listsec1_out(10) = 0 ! Reference Time - Minute
+    	listsec1_out(11) = 0 ! Reference Time - Second
+    	listsec1_out(12) = 0 ! Production status of data (Code Table 1.3)
+    	listsec1_out(13) = 1 ! Type of processed data (Code Table 1.4)
+                     ! 0 for analysis products and 1 for forecast products
+		     
+>>>>>>> parent of 2c686d1 (add yy,mm,dd,fhr)
         call gribcreate(cgrib2,max_bytes,listsec0_out,listsec1_out,ierr)
 	
  	! build the array field for grib2
