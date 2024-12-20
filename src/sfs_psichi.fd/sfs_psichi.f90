@@ -295,6 +295,8 @@
       do l=1,ldim
         lev=presslevs(l)
         allocate(cgrib2(max_bytes))
+
+        call gribcreate(cgrib2,max_bytes,listsec0_out,listsec1_out,ierr)
 	
  	! build the array field for grib2
   	allocate(dummy1d(idim*jdim))
