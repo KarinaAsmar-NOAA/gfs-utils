@@ -264,6 +264,8 @@
       igds(5)=idrt !Grid Definition Template Number (Code Table 3.1)
     
 ! ADD STREAMFUNCTION
+      allocate(ipdstmpl((ipdtlen)))
+      allocate(bmap(npt))
       ipdstmpl(1) = 2    ! ==> parameter category (see Code Table 4.1)
       ipdstmpl(2) = 4    ! ==> parameter number (see Code Tavle 4.2)
       ipdstmpl(3) = 2    ! ==> type of generating process (see Code Table 4.3)
@@ -290,9 +292,6 @@
       ibmap = 255
       
 ! Write GRIB2 file for each mb level
-      allocate(ipdstmpl((ipdtlen)))
-      allocate(bmap(npt))
-      
       do l=1,ldim
         lev=presslevs(l)
         allocate(cgrib2(max_bytes))
