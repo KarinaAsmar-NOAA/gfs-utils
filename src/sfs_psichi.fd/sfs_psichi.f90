@@ -238,30 +238,6 @@
 	  print*,'psio',l,psio(idim/2,jdim/2,l)
    	  print*,'so',l,so(idim/2,jdim/2,l)
 	enddo
- 
-!==>initialize new GRIB2 message and pack
-! GRIB2 sections 0 (Indicator Section) and 1 (Identification Section)
-      listsec0_out(1)=0    ! Discipline-GRIB Master Table Number (see Code Table 0.0)
-      listsec0_out(2)=2    ! GRIB Edition Number (currently 2)
-      listsec1_out(1)=7    ! Id of orginating centre (Common Code Table C-1)  !!! CHECK**********
-      listsec1_out(2)=4    !"EMC"! Id of orginating sub-centre (local table)/Table C of ON388 CHECK *************
-      listsec1_out(4)=1    ! per Brent! GRIB Local Tables Version Number (Code Table 1.1)  **********
-      listsec1_out(5)=1    ! Significance of Reference Time (Code Table 1.2)  *********************
-      listsec1_out(6)=yy   ! year
-      listsec1_out(7)=mm   ! mon
-      listsec1_out(8)=dd   ! day
-      listsec1_out(9)=fhr  ! hr
-      listsec1_out(10) = 0 ! Reference Time - Minute
-      listsec1_out(11) = 0 ! Reference Time - Second
-      listsec1_out(12) = 0 ! Production status of data (Code Table 1.3)
-      listsec1_out(13) = 1 ! Type of processed data (Code Table 1.4)
-                           ! 0 for analysis products and 1 for forecast products
-		     
-      igds(1)=0   !Source of grid definition (see Code Table 3.0)
-      igds(2)=npt !Number of grid points in the defined grid.
-      igds(3)=0   !Number of octets needed for each additional grid points definition
-      igds(4)=0   !Interpretation of list for optional points definition (Code Table 3.11)
-      igds(5)=idrt !Grid Definition Template Number (Code Table 3.1)
     
 ! ADD STREAMFUNCTION
       allocate(ipdstmpl((ipdtlen)))
@@ -295,13 +271,7 @@
       do l=1,ldim
         lev=presslevs(l)
         allocate(cgrib2(max_bytes))
-
-<<<<<<< HEAD
-=======
- 	print*,'grib loop',l,ipdtlen
-    	print *, "ipdtnum=",ipdtnum,ipdtlen,ipdstmpl
-    	print *, "idrtnum=",idrtnum,idrtlen,idrtmpl
-	print*,  "ipdstmpl",ipdstmpl
+	
 !==>initialize new GRIB2 message and pack
 ! GRIB2 sections 0 (Indicator Section) and 1 (Identification Section)
         listsec0_out(1)=0 ! Discipline-GRIB Master Table Number (see Code Table 0.0)
@@ -320,7 +290,6 @@
     	listsec1_out(13) = 1 ! Type of processed data (Code Table 1.4)
                      ! 0 for analysis products and 1 for forecast products
 		     
->>>>>>> parent of 2c686d1 (add yy,mm,dd,fhr)
         call gribcreate(cgrib2,max_bytes,listsec0_out,listsec1_out,ierr)
 	
  	! build the array field for grib2
@@ -334,8 +303,6 @@
 	enddo
 
       	print*,'dummy1d',maxval(dummy1d),minval(dummy1d)
-       	print*,'dimensions',idim,jdim,ldim
-	print*,'grid points',idim*jdim,npt
         
         call addfield(cgrib2,max_bytes,ipdtnum,ipdstmpl,ipdtlen,  &
                       coordlist,numcoord,idrtnum,idrtmpl,	  &
