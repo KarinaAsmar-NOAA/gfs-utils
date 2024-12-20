@@ -223,10 +223,10 @@
 	print*,'vi',vi(idim/2,jdim/2,ldim/2)
 	print*,'jcap',jcap
 	print*,'idrt',idrt
-       call sptrunv(0,jcap,idrt,idim,jdim,idrt,idim,jdim,ldim,           &
-                    0,0,0,0,0,0,0,0,ui(1,1,1),vi(1,1,1),		 &
-                    .false.,uo(1,1,1),vo(1,1,1),.false.,div,zo,.true.	 &
-                    ,psio(1,1,1),so(1,1,1))
+      call sptrunv(0,jcap,idrt,idim,jdim,idrt,idim,jdim,ldim,           &
+                   0,0,0,0,0,0,0,0,ui(1,1,1),vi(1,1,1),		 	&
+                   .false.,uo(1,1,1),vo(1,1,1),.false.,div,zo,.true.	&
+                   ,psio(1,1,1),so(1,1,1))
 
       deallocate(ui)
       deallocate(vi)
@@ -238,7 +238,57 @@
 	  print*,'psio',l,psio(idim/2,jdim/2,l)
    	  print*,'so',l,so(idim/2,jdim/2,l)
 	enddo
+ 
+!==>initialize new GRIB2 message and pack
+! GRIB2 sections 0 (Indicator Section) and 1 (Identification Section)
+      listsec0_out(1)=0    ! Discipline-GRIB Master Table Number (see Code Table 0.0)
+      listsec0_out(2)=2    ! GRIB Edition Number (currently 2)
+      listsec1_out(1)=7    ! Id of orginating centre (Common Code Table C-1)  !!! CHECK**********
+      listsec1_out(2)=4    !"EMC"! Id of orginating sub-centre (local table)/Table C of ON388 CHECK *************
+      listsec1_out(4)=1    ! per Brent! GRIB Local Tables Version Number (Code Table 1.1)  **********
+      listsec1_out(5)=1    ! Significance of Reference Time (Code Table 1.2)  *********************
+      listsec1_out(6)=yy   ! year
+      listsec1_out(7)=mm   ! mon
+      listsec1_out(8)=dd   ! day
+      listsec1_out(9)=fhr  ! hr
+      listsec1_out(10) = 0 ! Reference Time - Minute
+      listsec1_out(11) = 0 ! Reference Time - Second
+      listsec1_out(12) = 0 ! Production status of data (Code Table 1.3)
+      listsec1_out(13) = 1 ! Type of processed data (Code Table 1.4)
+                           ! 0 for analysis products and 1 for forecast products
+		     
+      igds(1)=0   !Source of grid definition (see Code Table 3.0)
+      igds(2)=npt !Number of grid points in the defined grid.
+      igds(3)=0   !Number of octets needed for each additional grid points definition
+      igds(4)=0   !Interpretation of list for optional points definition (Code Table 3.11)
+      igds(5)=idrt !Grid Definition Template Number (Code Table 3.1)
+    
+! ADD STREAMFUNCTION
+      ipdstmpl(1) = 2    ! ==> parameter category (see Code Table 4.1)
+      ipdstmpl(2) = 4    ! ==> parameter number (see Code Tavle 4.2)
+      ipdstmpl(3) = 2    ! ==> type of generating process (see Code Table 4.3)
+      ipdstmpl(4) = 0    ! ==> background generating process identifier 
+      ipdstmpl(5) = 96   ! ==> analysis or forecast generating process identifier (defined by originating Center)
+      ipdstmpl(6) = 0    ! ==> hours of observational data cutoff after reference time
+      ipdstmpl(7) = 0    ! ==> minutes of observational data cutoff after reference time
+      ipdstmpl(8) = 1    ! ==> indicator of unit of time range (see Code Table 4.4)
+			   ! ==>ifield4(9):forecast time in units defined by ifield4(8) 
+      ipdstmpl(10) = 100 ! ==> type of first fixed surface (see Code Table 4.5)
+      ipdstmpl(11) = 0   ! ==> scale factor of first fixed surface
+      ipdstmpl(12) = lev ! ==> scaled value of first fixed surface
+      ipdstmpl(13) = 255 ! ==> type of second fixed surface(See Code Table 4.5)
+      ipdstmpl(14) = 0   ! ==> scale factor of second fixed surface
+      ipdstmpl(15) = 0   ! == > scaled value of second fixed surface
+      if(size(ipdstmpl)>=16) then
+!==> ifield4(16):Statistical process used within the spatial area (see Code Table 4.10)
+	ipdstmpl(17) = 3 ! ==> Type of spatial processing
+        ipdstmpl(18) = 1 ! ==> Number of data points used in spatial processing
+      end if
 
+      numcoord = 0
+      coordlist = 0.
+      ibmap = 255
+      
 ! Write GRIB2 file for each mb level
       allocate(ipdstmpl((ipdtlen)))
       allocate(bmap(npt))
@@ -246,64 +296,6 @@
       do l=1,ldim
         lev=presslevs(l)
         allocate(cgrib2(max_bytes))
-
- 	print*,'grib loop',l,ipdtlen
-    	print *, "ipdtnum=",ipdtnum,ipdtlen,ipdstmpl
-    	print *, "idrtnum=",idrtnum,idrtlen,idrtmpl
-	print*,  "ipdstmpl",ipdstmpl
-!==>initialize new GRIB2 message and pack
-! GRIB2 sections 0 (Indicator Section) and 1 (Identification Section)
-        listsec0_out(1)=0    ! Discipline-GRIB Master Table Number (see Code Table 0.0)
-        listsec0_out(2)=2    ! GRIB Edition Number (currently 2)
-    	listsec1_out(1)=7    ! Id of orginating centre (Common Code Table C-1)  !!! CHECK**********
-    	listsec1_out(2)=4    !"EMC"! Id of orginating sub-centre (local table)/Table C of ON388 CHECK *************
-    	listsec1_out(4)=1    ! per Brent! GRIB Local Tables Version Number (Code Table 1.1)  **********
-    	listsec1_out(5)=1    ! Significance of Reference Time (Code Table 1.2)  *********************
-        listsec1_out(6)=yy   ! year
-        listsec1_out(7)=mm   ! mon
-        listsec1_out(8)=dd   ! day
-        listsec1_out(9)=fhr  ! hr
-    	listsec1_out(10) = 0 ! Reference Time - Minute
-    	listsec1_out(11) = 0 ! Reference Time - Second
-    	listsec1_out(12) = 0 ! Production status of data (Code Table 1.3)
-    	listsec1_out(13) = 1 ! Type of processed data (Code Table 1.4)
-                     ! 0 for analysis products and 1 for forecast products
-		     
-        call gribcreate(cgrib2,max_bytes,listsec0_out,listsec1_out,ierr)
-
-        igds(1)=0   !Source of grid definition (see Code Table 3.0)
-    	igds(2)=npt !Number of grid points in the defined grid.
-    	igds(3)=0   !Number of octets needed for each additional grid points definition
-    	igds(4)=0   !Interpretation of list for optional points definition (Code Table 3.11)
-    	igds(5)=idrt !Grid Definition Template Number (Code Table 3.1)
-    
-	call addgrid(cgrib2,max_bytes,igds,igdstmpl,igdtlen,0,1,ierr)
-
-! ADD STREAMFUNCTION
-        ipdstmpl(1) = 2    ! ==> parameter category (see Code Table 4.1)
-	ipdstmpl(2) = 4    ! ==> parameter number (see Code Tavle 4.2)
-	ipdstmpl(3) = 2    ! ==> type of generating process (see Code Table 4.3)
-	ipdstmpl(4) = 0    ! ==> background generating process identifier 
-	ipdstmpl(5) = 96   ! ==> analysis or forecast generating process identifier (defined by originating Center)
- 	ipdstmpl(6) = 0    ! ==> hours of observational data cutoff after reference time
-  	ipdstmpl(7) = 0    ! ==> minutes of observational data cutoff after reference time
-	ipdstmpl(8) = 1    ! ==> indicator of unit of time range (see Code Table 4.4)
-			   ! ==>ifield4(9):forecast time in units defined by ifield4(8) 
-	ipdstmpl(10) = 100 ! ==> type of first fixed surface (see Code Table 4.5)
-    	ipdstmpl(11) = 0   ! ==> scale factor of first fixed surface
-	ipdstmpl(12) = lev ! ==> scaled value of first fixed surface
- 	ipdstmpl(13) = 255 ! ==> type of second fixed surface(See Code Table 4.5)
-	ipdstmpl(14) = 0   ! ==> scale factor of second fixed surface
-	ipdstmpl(15) = 0   ! == > scaled value of second fixed surface
-    	if(size(ipdstmpl)>=16) then
-!==> ifield4(16):Statistical process used within the spatial area (see Code Table 4.10)
-	  ipdstmpl(17) = 3 ! ==> Type of spatial processing
-          ipdstmpl(18) = 1 ! ==> Number of data points used in spatial processing
-    	end if
-
-	numcoord = 0
-        coordlist = 0.
-	ibmap = 255
 	
  	! build the array field for grib2
   	allocate(dummy1d(idim*jdim))
