@@ -240,37 +240,38 @@
 	enddo
     
 ! ADD STREAMFUNCTION
-      allocate(ipdstmpl((ipdtlen)))
-      allocate(bmap(npt))
-      ipdstmpl(1) = 2    ! ==> parameter category (see Code Table 4.1)
-      ipdstmpl(2) = 4    ! ==> parameter number (see Code Tavle 4.2)
-      ipdstmpl(3) = 2    ! ==> type of generating process (see Code Table 4.3)
-      ipdstmpl(4) = 0    ! ==> background generating process identifier 
-      ipdstmpl(5) = 96   ! ==> analysis or forecast generating process identifier (defined by originating Center)
-      ipdstmpl(6) = 0    ! ==> hours of observational data cutoff after reference time
-      ipdstmpl(7) = 0    ! ==> minutes of observational data cutoff after reference time
-      ipdstmpl(8) = 1    ! ==> indicator of unit of time range (see Code Table 4.4)
-			   ! ==>ifield4(9):forecast time in units defined by ifield4(8) 
-      ipdstmpl(10) = 100 ! ==> type of first fixed surface (see Code Table 4.5)
-      ipdstmpl(11) = 0   ! ==> scale factor of first fixed surface
-      ipdstmpl(12) = lev ! ==> scaled value of first fixed surface
-      ipdstmpl(13) = 255 ! ==> type of second fixed surface(See Code Table 4.5)
-      ipdstmpl(14) = 0   ! ==> scale factor of second fixed surface
-      ipdstmpl(15) = 0   ! == > scaled value of second fixed surface
-      if(size(ipdstmpl)>=16) then
-!==> ifield4(16):Statistical process used within the spatial area (see Code Table 4.10)
-	ipdstmpl(17) = 3 ! ==> Type of spatial processing
-        ipdstmpl(18) = 1 ! ==> Number of data points used in spatial processing
-      end if
-
-      numcoord = 0
-      coordlist = 0.
-      ibmap = 255
       
 ! Write GRIB2 file for each mb level
       do l=1,ldim
         lev=presslevs(l)
         allocate(cgrib2(max_bytes))
+
+        allocate(ipdstmpl((ipdtlen)))
+        allocate(bmap(npt))
+        ipdstmpl(1) = 2    ! ==> parameter category (see Code Table 4.1)
+        ipdstmpl(2) = 4    ! ==> parameter number (see Code Tavle 4.2)
+        ipdstmpl(3) = 2    ! ==> type of generating process (see Code Table 4.3)
+        ipdstmpl(4) = 0    ! ==> background generating process identifier 
+        ipdstmpl(5) = 96   ! ==> analysis or forecast generating process identifier (defined by originating Center)
+        ipdstmpl(6) = 0    ! ==> hours of observational data cutoff after reference time
+        ipdstmpl(7) = 0    ! ==> minutes of observational data cutoff after reference time
+        ipdstmpl(8) = 1    ! ==> indicator of unit of time range (see Code Table 4.4)
+!ipdstmpl(9):forecast time in units defined by ifield4(8) 
+        ipdstmpl(10) = 100 ! ==> type of first fixed surface (see Code Table 4.5)
+        ipdstmpl(11) = 0   ! ==> scale factor of first fixed surface
+        ipdstmpl(12) = lev ! ==> scaled value of first fixed surface
+        ipdstmpl(13) = 255 ! ==> type of second fixed surface(See Code Table 4.5)
+        ipdstmpl(14) = 0   ! ==> scale factor of second fixed surface
+        ipdstmpl(15) = 0   ! == > scaled value of second fixed surface
+        if(size(ipdstmpl)>=16) then
+!==> ipdstmpl(16):Statistical process used within the spatial area (see Code Table 4.10)
+	  ipdstmpl(17) = 3 ! ==> Type of spatial processing
+          ipdstmpl(18) = 1 ! ==> Number of data points used in spatial processing
+        end if
+
+        numcoord = 0
+        coordlist = 0.
+        ibmap = 255
 	
 !==>initialize new GRIB2 message and pack
 ! GRIB2 sections 0 (Indicator Section) and 1 (Identification Section)
