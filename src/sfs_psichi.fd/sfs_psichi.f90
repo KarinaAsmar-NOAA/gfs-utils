@@ -317,6 +317,8 @@
 
 	deallocate(dummy1d)
  	deallocate(cgrib2)
+        deallocate(ipdstmpl)
+	deallocate(bmap)
       enddo   ! end do for ldim grib2
 
       STOP
