@@ -315,7 +315,8 @@
      	enddo
 	enddo
 
-      	print*,'dummy1d',maxval(dummy1d),minval(dummy1d)
+      	print*,'dummy1d',lev,maxval(dummy1d),minval(dummy1d)
+        print*,'dummy1d (2)',lev,sum(dummy1d)/size(dummy1d)
         
         call addfield(cgrib2,max_bytes,ipdtnum,ipdstmpl,ipdtlen,  &
                       coordlist,numcoord,idrtnum,idrtmpl,	  &
