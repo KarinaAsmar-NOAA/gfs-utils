@@ -56,7 +56,8 @@
       integer :: currlen=0,icount,itot,iseek
       integer :: lskip,lgrib,igdtlen,ipdtnum,ipdtlen
       integer :: idrtlen,idrtnum,ibmap,npt
-      integer :: lengrib,listsec0(3),listsec1(13)
+      integer :: lengrib, lengrib2
+      integer :: listsec0(3),listsec1(13)
       integer :: listsec0_out(2),listsec1_out(13)
       integer, allocatable :: igdstmpl(:),ipdstmpl(:),idrtmpl(:)
       integer(4) :: max_bytes,igds(5),numcoord,coordlist
@@ -321,10 +322,10 @@
                       idrtlen,dummy1d,npt,ibmap,bmap,ierr)
  	print*,'add field err',ierr
   	
-   	call gribend(cgrib2,max_bytes,lengrib,ierr)
+   	call gribend(cgrib2,max_bytes,lengrib2,ierr)
 	print*,'gribend err',ierr
     
-        call wryte(51, lengrib, cgrib2)
+        call wryte(51, lengrib2, cgrib2)
 
 	deallocate(dummy1d)
  	deallocate(cgrib2)
